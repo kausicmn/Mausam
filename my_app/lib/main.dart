@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -53,6 +55,20 @@ class _MyHomePageState extends State<MyHomePage> {
     return position;
   }
 
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
+
+  static const CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.4746,
+  );
+
+  static const CameraPosition _kLake = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(37.43296265331129, -122.08832357078792),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
+
   @override
   void initState() {
     // TODO: implement initState
@@ -79,11 +95,22 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: getBody(),
-        ),
+      // body: Center(
+      //   child: Column(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: getBody(),
+      //   ),
+      body: GoogleMap(
+        mapType: MapType.hybrid,
+        initialCameraPosition: _kGooglePlex,
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _goToTheLake,
+        label: const Text('To the lake!'),
+        icon: const Icon(Icons.directions_boat),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
     );
@@ -132,20 +159,32 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> getBody() {
     return <Widget>[
-      FutureBuilder(
-          future: _position,
-          builder: (BuildContext context, AsyncSnapshot<Position> snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return const CircularProgressIndicator();
-              default:
-                if (snapshot.hasError) {
-                  return Text("Error: ${snapshot.error}");
-                }
-                return Text(
-                    '${snapshot.data!.latitude}, ${snapshot.data!.longitude}, ${snapshot.data!.accuracy}');
-            }
-          }),
+      // FutureBuilder(
+      //     future: _position,
+      //     builder: (BuildContext context, AsyncSnapshot<Position> snapshot) {
+      //       switch (snapshot.connectionState) {
+      //         case ConnectionState.waiting:
+      //           return const CircularProgressIndicator();
+      //         default:
+      //           if (snapshot.hasError) {
+      //             return Text("Error: ${snapshot.error}");
+      //           }
+      //           return Text(
+      //               '${snapshot.data!.latitude}, ${snapshot.data!.longitude}, ${snapshot.data!.accuracy}');
+      //       }
+      //     }),
+      GoogleMap(
+        mapType: MapType.hybrid,
+        initialCameraPosition: _kGooglePlex,
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+      ),
     ];
+  }
+
+  Future<void> _goToTheLake() async {
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }
 }
