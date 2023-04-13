@@ -1,59 +1,34 @@
-import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:my_app/SecondRoute.dart';
 
 void main() {
-  runApp(const MyHomePage());
+  runApp(const MaterialApp(
+    title: 'Navigation Basics',
+    home: FirstRoute(),
+  ));
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  String searchValue = '';
-  final List<String> _suggestions = ['Chico', 'Sacramento', 'San francisco', 'San jose', 'India', 'German', 'Madagascar', 'Mozambique', 'Portugal', 'Zambia'];
+class FirstRoute extends StatelessWidget {
+  const FirstRoute({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
-        title: 'Locations',
-        theme: ThemeData(
-            primarySwatch: Colors.orange
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('First Route'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          child: const Text('Open Search'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyHomePage()),
+            );
+          },
         ),
-        home: Scaffold(
-            appBar: EasySearchBar(
-                title: const Text('Locations'),
-                onSearch: (value) => setState(() => searchValue = value),
-                suggestions: _suggestions
-            ),
-            drawer: Drawer(
-                child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      const DrawerHeader(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                        ),
-                        child: Text('Drawer Header'),
-                      ),
-                      ListTile(
-                          title: const Text('Item 1'),
-                          onTap: () => Navigator.pop(context)
-                      ),
-                      ListTile(
-                          title: const Text('Item 2'),
-                          onTap: () => Navigator.pop(context)
-                      )
-                    ]
-                )
-            ),
-            body: Center(
-                child: Text('Value: $searchValue')
-            )
-        )
+      ),
     );
   }
 }
+
