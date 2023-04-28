@@ -47,14 +47,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late Future<Position> _position;
-
-  Future<Position> returnPosition(Position? position) async {
-    if (position == null) {
-      return Future.error("No position");
-    }
-    return position;
-  }
-
+  late CameraPosition _kLake;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
@@ -62,25 +55,29 @@ class _MyHomePageState extends State<MyHomePage> {
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
   );
-
-  static const CameraPosition _kLake = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(37.43296265331129, -122.08832357078792),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414);
+  Future<Position> returnPosition(Position? position) async {
+    if (position == null) {
+      return Future.error("No position");
+    }
+    return position;
+  }
 
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
     _position = _determinePosition();
+    super.initState();
+
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 100,
+      distanceFilter: 1,
     );
     Geolocator.getPositionStream(locationSettings: locationSettings)
         .listen((Position? position) {
-      _position = returnPosition(position);
+      setState(() {
+        _position = returnPosition(position);
+        // _goToTheLake(position!);
+      });
       if (kDebugMode) {
         print(position == null
             ? 'Unknown'
@@ -95,23 +92,47 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      // body: Center(
-      //   child: Column(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: getBody(),
-      //   ),
-      body: GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
+      body: Center(
+        child: FutureBuilder(
+            future: _position,
+            builder: (BuildContext context, AsyncSnapshot<Position> snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.waiting:
+                  return const CircularProgressIndicator();
+                default:
+                  if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  }
+                  if (snapshot.hasData) {
+                    return GoogleMap(
+                      mapType: MapType.normal,
+                      myLocationEnabled: true,
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                            snapshot.data!.latitude, snapshot.data!.longitude),
+                        zoom: 14.4746,
+                      ),
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller.complete(controller);
+                      },
+                    );
+                  }
+                  return Text("Error: ${snapshot.error}");
+              }
+            }),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: const Text('To the lake!'),
-        icon: const Icon(Icons.directions_boat),
-      ),
+      // body: GoogleMap(
+      //   mapType: MapType.normal,
+      //   initialCameraPosition: _kGooglePlex,
+      //   onMapCreated: (GoogleMapController controller) {
+      //     _controller.complete(controller);
+      //   },
+      // ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: _goToTheLake,
+      //   label: const Text('To the lake!'),
+      //   icon: const Icon(Icons.directions_boat),
+      // ),
       // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
@@ -157,34 +178,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return await Geolocator.getCurrentPosition();
   }
 
-  List<Widget> getBody() {
-    return <Widget>[
-      // FutureBuilder(
-      //     future: _position,
-      //     builder: (BuildContext context, AsyncSnapshot<Position> snapshot) {
-      //       switch (snapshot.connectionState) {
-      //         case ConnectionState.waiting:
-      //           return const CircularProgressIndicator();
-      //         default:
-      //           if (snapshot.hasError) {
-      //             return Text("Error: ${snapshot.error}");
-      //           }
-      //           return Text(
-      //               '${snapshot.data!.latitude}, ${snapshot.data!.longitude}, ${snapshot.data!.accuracy}');
-      //       }
-      //     }),
-      GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      ),
-    ];
-  }
+  // List<Widget> getBody() {
+  //   return <Widget>[
+  //     ,
+  //   ];
+  // }
 
-  Future<void> _goToTheLake() async {
+  Future<void> _goToTheLake(Position position) async {
     final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      target: LatLng(position.latitude, position.longitude),
+      zoom: 14.4746,
+    )));
   }
 }
