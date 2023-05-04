@@ -33,7 +33,7 @@ class CurrentWeather extends StatelessWidget {
             children: [
               Text(
                 weatherService.cityName ?? '',
-                style: const TextStyle(fontSize: 24),
+                style: const TextStyle(fontSize: 20),
               ),
               const SizedBox(height: 16),
               Text(
