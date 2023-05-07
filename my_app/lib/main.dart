@@ -6,10 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:my_app/images.dart';
 import 'package:my_app/position.dart';
 import 'package:uuid/uuid.dart';
 import 'add_photos.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 void main() {
@@ -92,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // });
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
+      distanceFilter: 100,
     );
 
     Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -107,6 +108,25 @@ class _MyHomePageState extends State<MyHomePage> {
             : '${position.latitude.toString()}, ${position.longitude.toString()}');
       }
     });
+  }
+
+// final controller = _controller.future;
+// controller.addMarker(newMarker);
+  void createMarker(double latitude, double longitude) {
+    _currentLocationMarker = Marker(
+        markerId: MarkerId(const Uuid().v4()),
+        position: LatLng(latitude, longitude),
+        infoWindow: const InfoWindow(title: 'Current Location'),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => DisplayImage(
+                        latitude: latitude,
+                        longitude: longitude,
+                      )));
+        });
+    markers.add(_currentLocationMarker);
   }
 
   @override
@@ -127,40 +147,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     return Text("Error: ${snapshot.error}");
                   }
                   if (snapshot.hasData) {
-                    userLocation = GeoPoint(
+                    createMarker(
                         snapshot.data!.latitude, snapshot.data!.longitude);
-                    _currentLocationMarker = Marker(
-                        markerId: MarkerId(const Uuid().v4()),
-                        position: LatLng(
-                            snapshot.data!.latitude, snapshot.data!.longitude),
-                        infoWindow: const InfoWindow(title: 'Current Location'),
-                        // onTap: () {
-                        //   _onMarkerTapped(MarkerId(markerIdVal))
-                        //   print('lat $snapshot.data!.latitude');
-                        //   print('long $snapshot.data!.longitude');
-                        //   userLocation = GeoPoint(
-                        //       _currentLocationMarker.position.latitude,
-                        //       _currentLocationMarker.position.longitude);
-                        //   final photos = getBody();
-                        //   Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => Scaffold(
-                        //         appBar: AppBar(
-                        //           title: const Text('Photos'),
-                        //         ),
-                        //         body: ListView.builder(
-                        //           itemCount: photos.length,
-                        //           itemBuilder: (BuildContext context, int index) {
-                        //             return photos[index];
-                        //           },
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   );
-                        // },
-                        onTap: () => _onMarkerTapped());
-                    markers.add(_currentLocationMarker);
                     return GoogleMap(
                       mapType: MapType.normal,
                       myLocationEnabled: true,
@@ -191,119 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Add a Photo',
         child: const Icon(Icons.add_a_photo),
       ),
-      // body: GoogleMap(
-      //   mapType: MapType.normal,
-      //   initialCameraPosition: _kGooglePlex,
-      //   onMapCreated: (GoogleMapController controller) {
-      //     _controller.complete(controller);
-      //   },
-      // ),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: _goToTheLake,
-      //   label: const Text('To the lake!'),
-      //   icon: const Icon(Icons.directions_boat),
-      // ),
-      // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
-
-  // Future<void> _goToTheLake(Position position) async {
-  //   final GoogleMapController controller = await _controller.future;
-  //   controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-  //     target: LatLng(position.latitude, position.longitude),
-  //     zoom: 14.4746,
-  //   )));
-  // }
-
-  List<Widget> getBody() {
-    List<Widget> widgets = [];
-    widgets.add(StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection("photos")
-            .where("geopoint", isGreaterThanOrEqualTo: userLocation)
-            .where("geopoint", isLessThanOrEqualTo: userLocation)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            if (kDebugMode) {
-              print(snapshot.error.toString());
-            }
-            return Text(snapshot.error.toString());
-          }
-          if (!snapshot.hasData) {
-            return const Text("Loading Photos");
-          }
-          return Scrollbar(
-              child: ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              DocumentSnapshot item = snapshot.data!.docs[index];
-              return photoWidget(item);
-            },
-            itemCount: snapshot.data!.docs.length,
-            shrinkWrap: true,
-          ));
-        }));
-    return widgets;
-  }
-
-  // Widget getBody() {
-  //   return StreamBuilder(
-  //     stream: FirebaseFirestore.instance
-  //         .collection("photos")
-  //         .where("geopoint", isGreaterThanOrEqualTo: userLocation)
-  //         .where("geopoint", isLessThanOrEqualTo: userLocation)
-  //         .snapshots(),
-  //     builder: (context, snapshot) {
-  //       if (snapshot.hasError) {
-  //         if (kDebugMode) {
-  //           print(snapshot.error.toString());
-  //         }
-  //         return Text(snapshot.error.toString());
-  //       }
-  //       if (!snapshot.hasData) {
-  //         return const Text("Loading Photos");
-  //       }
-  //       return Expanded(
-  //         child: Scrollbar(
-  //           child: ListView.builder(
-  //             physics: const AlwaysScrollableScrollPhysics(),
-  //             itemBuilder: (context, index) {
-  //               DocumentSnapshot item = snapshot.data!.docs[index];
-  //               return photoWidget(item);
-  //             },
-  //             itemCount: snapshot.data!.docs.length,
-  //             shrinkWrap: true,
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  Widget photoWidget(DocumentSnapshot snapshot) {
-    try {
-      return Column(
-        children: [
-          ListTile(
-            title: Text(snapshot["title"]),
-            subtitle: Text(snapshot["uid"]),
-          ),
-          Image.network(snapshot["downloadURL"])
-        ],
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print(e.toString());
-      }
-      return ListTile(title: Text(e.toString()));
-    }
-  }
-  // List<Widget> getUnsignedBody() {
-  //   List<Widget> widgets = [];
-  //   widgets.add(const Text("You are not currently signed in"));
-  //   widgets.add(ElevatedButton(
-  //       onPressed: signInWithGoogle, child: const Text("Sign In")));
-  //   return widgets;
-  // }
 }

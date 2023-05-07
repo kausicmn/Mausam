@@ -4,9 +4,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_app/images.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'marker.dart';
 import 'position.dart';
 
 class AddPhoto extends StatefulWidget {
@@ -22,13 +25,13 @@ class _AddPhotoState extends State<AddPhoto> {
   File? _image;
   Position? _position;
   final myController = TextEditingController();
-
   @override
   void dispose() {
     myController.dispose();
     super.dispose();
   }
 
+  @override
   void initState() {
     super.initState();
     PositionHelper().determinePosition().then((value) => setState(() {
@@ -74,7 +77,6 @@ class _AddPhotoState extends State<AddPhoto> {
     if (kDebugMode) {
       print(uuidString);
     }
-
     Navigator.pop(context);
   }
 
@@ -104,32 +106,36 @@ class _AddPhotoState extends State<AddPhoto> {
       'geopoint': GeoPoint(_position!.latitude, _position!.longitude),
       'uid': uid,
     });
+
+    // print('after upload {$marker().getMarker()}');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
-        body: Column(
-          children: [
-            _image != null
-                ? Image.file(_image!)
-                : const Text("No image selected"),
-            TextField(
-              controller: myController,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), hintText: "Title of the photo"),
-            ),
-            ElevatedButton(
-              onPressed: _upload,
-              child: const Text("Submit"),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _getImage,
-          tooltip: 'Take Photo',
-          child: const Icon(Icons.add_a_photo),
-        ));
+      appBar: AppBar(title: Text(widget.title)),
+      body: SingleChildScrollView(
+          child: Column(
+        children: [
+          _image != null
+              ? Image.file(_image!)
+              : const Text("No image selected"),
+          TextField(
+            controller: myController,
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(), hintText: "Title of the photo"),
+          ),
+          ElevatedButton(
+            onPressed: _upload,
+            child: const Text("Submit"),
+          ),
+        ],
+      )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _getImage,
+        tooltip: 'Take Photo',
+        child: const Icon(Icons.add_a_photo),
+      ),
+    );
   }
 }
