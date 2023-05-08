@@ -4,13 +4,11 @@ import 'package:weather/weather.dart';
 import 'package:geolocator/geolocator.dart';
 import 'map_page.dart';
 import 'search_page.dart';
+import 'SecondRoute.dart';
 import 'settings_page.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    title: 'Navigation Basics',
-    home: FirstRoute(),
-  ));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -93,23 +91,23 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
 
-      actions: [
-        IconButton(
-          icon: Icon(Icons.settings),
-          onPressed: () async {
-            final isFahrt = await Navigator.push<bool>(
-              context,
-              MaterialPageRoute(builder: (context) => SettingsPage(onTemperatureUnitChanged: _unitChanged,isFahrt: _isFahrt)),
-            );
-            if (isFahrt != null) {
-              setState(() {
-                _isFahrt = isFahrt;
-              });
-            }
-          },
-        ),
-      ],
-    ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () async {
+              final isFahrt = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage(onTemperatureUnitChanged: _unitChanged,isFahrt: _isFahrt)),
+              );
+              if (isFahrt != null) {
+                setState(() {
+                  _isFahrt = isFahrt;
+                });
+              }
+            },
+          ),
+        ],
+      ),
       body: FutureBuilder<Position>(
         future: _getcurrentlocation(),
         builder: (context, snapshot) {
@@ -153,8 +151,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                          _isFahrt?'${snapshot.data!.temperature?.fahrenheit?.toInt() ?? ''}°F'
-                            :'${snapshot.data!.temperature?.celsius?.toInt() ?? ''}°C',
+                            _isFahrt?'${snapshot.data!.temperature?.fahrenheit?.toInt() ?? ''}°F'
+                                :'${snapshot.data!.temperature?.celsius?.toInt() ?? ''}°C',
                             style: TextStyle(
                               fontSize: 64,
                               fontWeight: FontWeight.bold,
@@ -244,7 +242,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SearchPage()),
+                  MaterialPageRoute(builder: (context) => const SecondPage()),
                 );
               },
             ),

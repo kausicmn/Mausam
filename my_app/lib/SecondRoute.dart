@@ -4,18 +4,18 @@ import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(const MyHomePage());
+  runApp(const SecondPage());
 }
 
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class SecondPage extends StatefulWidget {
+  const SecondPage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<SecondPage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<SecondPage> {
   String searchValue = '';
   SharedPreferences? prefs;
   List<String> _searchHistory=['Chico'];
