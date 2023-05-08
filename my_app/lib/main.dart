@@ -92,6 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // setState(() {
     //   PhotoStorage().initializeDefault();
     // });
+    setState(() {
+      getMarkersFromFirebase();
+    });
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.best,
       distanceFilter: 100,
@@ -211,7 +214,6 @@ class _MyHomePageState extends State<MyHomePage> {
   //                       )));
   //         }));
   //   });
-
   void _handleTap(LatLng point) async {
     // Create a new marker
     final marker = Marker(
@@ -272,7 +274,6 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         markers.add(marker);
       });
-      setState(() {});
     }
   }
 }
