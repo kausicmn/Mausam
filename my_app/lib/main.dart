@@ -10,7 +10,6 @@ import 'package:my_app/images.dart';
 import 'package:my_app/position.dart';
 import 'package:uuid/uuid.dart';
 import 'add_photos.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -60,16 +59,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late Future<Position> _position;
-  late CameraPosition _kLake;
   late Set<Marker> markers;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
-  late Marker _currentLocationMarker;
-  late GeoPoint userLocation;
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
   Future<Position> returnPosition(Position? position) async {
     if (position == null) {
       return Future.error("No position");
@@ -77,21 +69,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return position;
   }
 
-  // Future signInWithGoogle() async {
-  //   // Trigger the authentication flow
-  // }
-
   @override
   void initState() {
     // TODO: implement initState
-
     super.initState();
     _position = PositionHelper().determinePosition();
     markers = <Marker>{};
-
-    // setState(() {
-    //   PhotoStorage().initializeDefault();
-    // });
     setState(() {
       getMarkersFromFirebase();
     });
@@ -114,30 +97,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-// final controller = _controller.future;
-// controller.addMarker(newMarker);
-  void createMarker(LatLng l) {
-    _currentLocationMarker = Marker(
-        markerId: MarkerId(const Uuid().v4()),
-        position: LatLng(l.latitude, l.longitude),
-        infoWindow: const InfoWindow(title: 'Current Location'),
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => DisplayImage(
-                        latitude: l.latitude,
-                        longitude: l.longitude,
-                      )));
-        });
-    markers.add(_currentLocationMarker);
-    // await FirebaseFirestore.instance.collection('markers').add({
-    //   'latitude': latitude,
-    //   'longitude': longitude,
-    //   'id': _currentLocationMarker.markerId,
-    // });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,10 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     return Text("Error: ${snapshot.error}");
                   }
                   if (snapshot.hasData) {
-                    // createMarker(
-                    //     snapshot.data!.latitude, snapshot.data!.longitude);
-                    // Position position = snapshot.data![0];
-                    // Set<Marker> markersp = snapshot.data![1];
                     return GoogleMap(
                         mapType: MapType.normal,
                         myLocationEnabled: true,
@@ -194,52 +149,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // void _handleTap(LatLng point) {
-  //   setState(() {
-  //     markers.add(Marker(
-  //         markerId: MarkerId(point.toString()),
-  //         position: point,
-  //         infoWindow: const InfoWindow(
-  //           title: 'I am a marker',
-  //         ),
-  //         icon: BitmapDescriptor.defaultMarkerWithHue(
-  //             BitmapDescriptor.hueMagenta),
-  //         onTap: () {
-  //           Navigator.push(
-  //               context,
-  //               MaterialPageRoute(
-  //                   builder: (context) => DisplayImage(
-  //                         latitude: point.latitude,
-  //                         longitude: point.longitude,
-  //                       )));
-  //         }));
-  //   });
-  void _handleTap(LatLng point) async {
+  void _handleTap(LatLng point) {
     // Create a new marker
     final marker = Marker(
       markerId: MarkerId(const Uuid().v4()),
       position: point,
-      infoWindow: const InfoWindow(
-        title: 'I am a marker',
-      ),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DisplayImage(
-              latitude: point.latitude,
-              longitude: point.longitude,
-            ),
-          ),
-        );
-      },
     );
-
-    // Add the marker to the map
-
-    // Add the marker to the Firebase collection
-    await FirebaseFirestore.instance.collection('marker').add({
+    FirebaseFirestore.instance.collection('marker').add({
       'id': marker.markerId.toString(),
       'latitude': marker.position.latitude,
       'longitude': marker.position.longitude,
@@ -252,8 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> getMarkersFromFirebase() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('marker').get();
-    List<DocumentSnapshot> docs = snapshot.docs;
-    for (DocumentSnapshot doc in docs) {
+    for (DocumentSnapshot doc in snapshot.docs) {
       double latitude = doc.get('latitude');
       double longitude = doc.get('longitude');
       Marker marker = Marker(

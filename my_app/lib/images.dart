@@ -13,7 +13,7 @@ class DisplayImage extends StatefulWidget {
 }
 
 class _DisplayImageState extends State<DisplayImage> {
-  @override
+  Geodesy geodesy = Geodesy();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,69 +21,16 @@ class _DisplayImageState extends State<DisplayImage> {
         title: const Text('Photos'),
       ),
       body: Center(
-        child: FutureBuilder<List<Widget>>(
-          future: images_list(),
-          builder:
-              (BuildContext context, AsyncSnapshot<List<Widget>> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: snapshot.data!,
-              );
-            }
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: tap(),
         ),
       ),
     );
   }
 
-  Future<List<Widget>> images_list() async {
+  List<Widget> tap() {
     List<Widget> widgets = [];
-    QuerySnapshot querySnapshot =
-        await FirebaseFirestore.instance.collection('photos').get();
-    List<DocumentSnapshot> docs = querySnapshot.docs;
-    Geodesy geodesy = Geodesy();
-    List<DocumentSnapshot> matchingDocs = [];
-    for (DocumentSnapshot d in docs) {
-      GeoPoint g = d.get('geopoint');
-      num distance = geodesy.distanceBetweenTwoGeoPoints(
-          LatLng(g.latitude, g.longitude),
-          LatLng(widget.latitude, widget.longitude));
-      if (distance <= 5000) {
-        matchingDocs.add(d);
-      }
-    }
-    widgets.add(Expanded(
-        child: Scrollbar(
-            child: ListView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        DocumentSnapshot item = matchingDocs[index];
-        return photoWidget(item);
-      },
-      itemCount: matchingDocs.length,
-      shrinkWrap: true,
-    ))));
-    return widgets;
-  }
-
-  List<Widget> tap(double latitude, double longitude) {
-    List<Widget> widgets = [];
-    var minLat = latitude - 0.009; // approx 10km south
-    var maxLat = latitude + 0.009; // approx 10km north
-    var minLong = longitude - 0.009; // approx 10km west
-    var maxLong = longitude + 0.009; // approx 10km east
-    GeoPoint min = GeoPoint(minLat, minLong);
-    GeoPoint max = GeoPoint(maxLat, maxLong);
-    Geodesy geodesy = Geodesy();
-    num distance = geodesy.distanceBetweenTwoGeoPoints(
-        LatLng(minLat, minLong), LatLng(maxLat, maxLong));
-    // GeoPoint x = GeoPoint(latitude, longitude);
-    print(distance);
     widgets.add(StreamBuilder(
         stream: FirebaseFirestore.instance.collection("photos").snapshots(),
         builder: (context, snapshot) {
@@ -96,15 +43,25 @@ class _DisplayImageState extends State<DisplayImage> {
           if (!snapshot.hasData) {
             return const Text("Loading Photos");
           }
+          List<DocumentSnapshot> matchingDocs = [];
+          for (DocumentSnapshot d in snapshot.data!.docs) {
+            GeoPoint g = d.get('geopoint');
+            num distance = geodesy.distanceBetweenTwoGeoPoints(
+                LatLng(g.latitude, g.longitude),
+                LatLng(widget.latitude, widget.longitude));
+            if (distance <= 5000) {
+              matchingDocs.add(d);
+            }
+          }
           return Expanded(
               child: Scrollbar(
                   child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             itemBuilder: (context, index) {
-              DocumentSnapshot item = snapshot.data!.docs[index];
+              DocumentSnapshot item = matchingDocs[index];
               return photoWidget(item);
             },
-            itemCount: snapshot.data!.docs.length,
+            itemCount: matchingDocs.length,
             shrinkWrap: true,
           )));
         }));

@@ -4,12 +4,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:my_app/images.dart';
 import 'package:uuid/uuid.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'marker.dart';
 import 'position.dart';
 
 class AddPhoto extends StatefulWidget {
@@ -106,8 +102,6 @@ class _AddPhotoState extends State<AddPhoto> {
       'geopoint': GeoPoint(_position!.latitude, _position!.longitude),
       'uid': uid,
     });
-
-    // print('after upload {$marker().getMarker()}');
   }
 
   @override
