@@ -41,6 +41,14 @@ dependencies:
   shared_preferences: ^2.0.17
   
   easy_search_bar: ^2.4.2
+  google_maps_flutter: ^2.2.5
+  firebase_core: ^2.10.0
+  image_picker: ^0.8.7+4
+  firebase_storage: ^11.1.1
+  cloud_firestore: ^4.5.3
+  uuid: ^3.0.7
+  firebase_auth: ^4.4.2
+  geodesy: ^0.4.0-nullsafety.0
 
 dev_dependencies:
   flutter_test:
