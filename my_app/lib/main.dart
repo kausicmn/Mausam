@@ -13,11 +13,12 @@ import 'add_photos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
-void main() {
-  runApp(const MyApp());
-  Firebase.initializeApp(
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -92,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //   PhotoStorage().initializeDefault();
     // });
     const LocationSettings locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
+      accuracy: LocationAccuracy.best,
       distanceFilter: 100,
     );
 
@@ -112,21 +113,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // final controller = _controller.future;
 // controller.addMarker(newMarker);
-  void createMarker(double latitude, double longitude) {
+  void createMarker(LatLng l) {
     _currentLocationMarker = Marker(
         markerId: MarkerId(const Uuid().v4()),
-        position: LatLng(latitude, longitude),
+        position: LatLng(l.latitude, l.longitude),
         infoWindow: const InfoWindow(title: 'Current Location'),
         onTap: () {
           Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => DisplayImage(
-                        latitude: latitude,
-                        longitude: longitude,
+                        latitude: l.latitude,
+                        longitude: l.longitude,
                       )));
         });
     markers.add(_currentLocationMarker);
+    // await FirebaseFirestore.instance.collection('markers').add({
+    //   'latitude': latitude,
+    //   'longitude': longitude,
+    //   'id': _currentLocationMarker.markerId,
+    // });
   }
 
   @override
@@ -147,21 +153,23 @@ class _MyHomePageState extends State<MyHomePage> {
                     return Text("Error: ${snapshot.error}");
                   }
                   if (snapshot.hasData) {
-                    createMarker(
-                        snapshot.data!.latitude, snapshot.data!.longitude);
+                    // createMarker(
+                    //     snapshot.data!.latitude, snapshot.data!.longitude);
+                    // Position position = snapshot.data![0];
+                    // Set<Marker> markersp = snapshot.data![1];
                     return GoogleMap(
-                      mapType: MapType.normal,
-                      myLocationEnabled: true,
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(
-                            snapshot.data!.latitude, snapshot.data!.longitude),
-                        zoom: 14.4746,
-                      ),
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller.complete(controller);
-                      },
-                      markers: markers,
-                    );
+                        mapType: MapType.normal,
+                        myLocationEnabled: true,
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(snapshot.data!.latitude,
+                              snapshot.data!.longitude),
+                          zoom: 14.4746,
+                        ),
+                        onMapCreated: (GoogleMapController controller) {
+                          _controller.complete(controller);
+                        },
+                        markers: markers,
+                        onTap: _handleTap);
                   }
                   return Text("Error: ${snapshot.error}");
               }
@@ -181,5 +189,90 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
+  }
+
+  // void _handleTap(LatLng point) {
+  //   setState(() {
+  //     markers.add(Marker(
+  //         markerId: MarkerId(point.toString()),
+  //         position: point,
+  //         infoWindow: const InfoWindow(
+  //           title: 'I am a marker',
+  //         ),
+  //         icon: BitmapDescriptor.defaultMarkerWithHue(
+  //             BitmapDescriptor.hueMagenta),
+  //         onTap: () {
+  //           Navigator.push(
+  //               context,
+  //               MaterialPageRoute(
+  //                   builder: (context) => DisplayImage(
+  //                         latitude: point.latitude,
+  //                         longitude: point.longitude,
+  //                       )));
+  //         }));
+  //   });
+
+  void _handleTap(LatLng point) async {
+    // Create a new marker
+    final marker = Marker(
+      markerId: MarkerId(const Uuid().v4()),
+      position: point,
+      infoWindow: const InfoWindow(
+        title: 'I am a marker',
+      ),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueMagenta),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DisplayImage(
+              latitude: point.latitude,
+              longitude: point.longitude,
+            ),
+          ),
+        );
+      },
+    );
+
+    // Add the marker to the map
+
+    // Add the marker to the Firebase collection
+    await FirebaseFirestore.instance.collection('marker').add({
+      'id': marker.markerId.toString(),
+      'latitude': marker.position.latitude,
+      'longitude': marker.position.longitude,
+    });
+    setState(() {
+      getMarkersFromFirebase();
+    });
+  }
+
+  Future<void> getMarkersFromFirebase() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('marker').get();
+    List<DocumentSnapshot> docs = snapshot.docs;
+    for (DocumentSnapshot doc in docs) {
+      double latitude = doc.get('latitude');
+      double longitude = doc.get('longitude');
+      Marker marker = Marker(
+        markerId: MarkerId(doc.get('id')),
+        position: LatLng(latitude, longitude),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DisplayImage(
+                latitude: latitude,
+                longitude: longitude,
+              ),
+            ),
+          );
+        },
+      );
+      setState(() {
+        markers.add(marker);
+      });
+      setState(() {});
+    }
   }
 }
