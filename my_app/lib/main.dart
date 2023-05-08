@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:weather/weather.dart';
+import 'package:geolocator/geolocator.dart';
+import 'map_page.dart';
+import 'search_page.dart';
+import 'settings_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -30,7 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -48,68 +54,201 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  WeatherFactory wf = WeatherFactory("c5ceceaa1d1369e8dc11555bfd199406");
+  bool _isFahrt = false;
+  Future<Position> _getcurrentlocation() async {
+    final GeolocatorPlatform _locator = GeolocatorPlatform.instance;
+    LocationPermission permission = await _getPermission();
+    return await _locator.getCurrentPosition();
+  }
 
-  void _incrementCounter() {
+
+  Future<Weather> _currentweather(Position position) async {
+    return wf.currentWeatherByLocation(
+        (await position).latitude, (await position).longitude);
+  }
+
+  Future<List<Weather>> _getForecast(Position position) async {
+    return wf.fiveDayForecastByLocation(
+        (await position).latitude, (await position).longitude);
+  }
+
+  Future<LocationPermission> _getPermission() async {
+    final GeolocatorPlatform _locator = GeolocatorPlatform.instance;
+    return _locator.requestPermission();
+  }
+
+  void _unitChanged(bool isFahrt){
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _isFahrt = isFahrt;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+
+      actions: [
+        IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () async {
+            final isFahrt = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsPage(onTemperatureUnitChanged: _unitChanged,isFahrt: _isFahrt)),
+            );
+            if (isFahrt != null) {
+              setState(() {
+                _isFahrt = isFahrt;
+              });
+            }
+          },
+        ),
+      ],
+    ),
+      body: FutureBuilder<Position>(
+        future: _getcurrentlocation(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          return Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: FutureBuilder<Weather>(
+                    future: _currentweather(snapshot.data!),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
+
+                      if (!snapshot.hasData) {
+                        return CircularProgressIndicator();
+                      }
+
+
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            snapshot.data!.areaName ?? '',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                          _isFahrt?'${snapshot.data!.temperature?.fahrenheit?.toInt() ?? ''}°F'
+                            :'${snapshot.data!.temperature?.celsius?.toInt() ?? ''}°C',
+                            style: TextStyle(
+                              fontSize: 64,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            snapshot.data!.weatherDescription ?? '',
+                            style: TextStyle(fontSize: 24),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Expanded(
+                child: FutureBuilder<List<Weather>>(
+                  future: _getForecast(snapshot.data!),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+
+                    if (!snapshot.hasData) {
+                      return CircularProgressIndicator();
+                    }
+
+                    return Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: DataTable(
+                          columnSpacing: 20.0,
+                          columns: [
+                            DataColumn(label: Text('Date')),
+                            DataColumn(label: Text('Time')),
+                            DataColumn(label: Text('Temperature')),
+                            DataColumn(label: Text('Description')),
+                          ],
+                          rows: snapshot.data!.map((weather) => DataRow(
+                            cells: [
+                              DataCell(Text(
+                                DateFormat('MM/dd/yyyy').format(weather.date!),
+                                style: TextStyle(fontSize: 16),
+                              )),
+                              DataCell(Text(
+                                DateFormat('h:mm a').format(weather.date!),
+                                style: TextStyle(fontSize: 16),
+                              )),
+                              DataCell(Text(
+                                _isFahrt ? '${weather.temperature?.fahrenheit?.toInt() ?? ''}°F' : '${weather.temperature?.celsius?.toInt() ?? ''}°C',
+                                style: TextStyle(fontSize: 16),
+                              )),
+                              DataCell(Text(
+                                weather.weatherDescription ?? '',
+                                style: TextStyle(fontSize: 16),
+                              )),
+                            ],
+                          )).toList(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+
+            ],
+          );
+        },
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.map),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MapPage()),
+                );
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SearchPage()),
+                );
+              },
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
 }

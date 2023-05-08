@@ -44,18 +44,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "ffi",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "file",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/file-6.1.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "flutter",
       "rootUri": "file:///C:/Users/todeshmukh/flutter_windows_3.7.1-stable/flutter/packages/flutter",
       "packageUri": "lib/",
@@ -78,30 +66,6 @@
       "rootUri": "file:///C:/Users/todeshmukh/flutter_windows_3.7.1-stable/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
       "languageVersion": "2.17"
-    },
-    {
-      "name": "geocoding",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding-2.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "geocoding_android",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding_android-2.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "geocoding_ios",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding_ios-2.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "geocoding_platform_interface",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding_platform_interface-2.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "geolocator",
@@ -194,92 +158,8 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "path_provider_linux",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_linux-2.1.10",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "path_provider_platform_interface",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_platform_interface-2.0.6",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "path_provider_windows",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_windows-2.1.6",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "permission_handler",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-8.3.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "permission_handler_platform_interface",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_platform_interface-3.9.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.14"
-    },
-    {
-      "name": "platform",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "plugin_platform_interface",
       "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/plugin_platform_interface-2.1.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "process",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/process-4.2.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.14"
-    },
-    {
-      "name": "shared_preferences",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.1.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "shared_preferences_foundation",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.2.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "shared_preferences_linux",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_linux-2.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "shared_preferences_platform_interface",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_platform_interface-2.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "shared_preferences_web",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_web-2.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "shared_preferences_windows",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_windows-2.2.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -344,25 +224,13 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "win32",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/win32-4.1.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "xdg_directories",
-      "rootUri": "file:///C:/Users/todeshmukh/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
       "name": "my_app",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     }
   ],
-  "generated": "2023-05-08T03:43:24.113571Z",
+  "generated": "2023-05-08T06:40:17.453506Z",
   "generator": "pub",
   "generatorVersion": "2.19.1"
 }
