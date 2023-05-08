@@ -7,7 +7,10 @@ import 'search_page.dart';
 import 'settings_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MaterialApp(
+    title: 'Navigation Basics',
+    home: FirstRoute(),
+  ));
 }
 
 class MyApp extends StatelessWidget {

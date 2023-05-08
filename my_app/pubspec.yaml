@@ -40,6 +40,9 @@ dependencies:
   intl: ^0.18.1
   shared_preferences: ^2.0.17
   
+  easy_search_bar: ^2.4.2
+  shared_preferences: ^2.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
