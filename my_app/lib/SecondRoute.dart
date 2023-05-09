@@ -1,7 +1,9 @@
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_search_bar/easy_search_bar.dart';
+import 'package:my_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'main.dart';
 
 void main() {
   runApp(const SecondPage());
@@ -93,8 +95,12 @@ class _MyHomePageState extends State<SecondPage> {
             },
           ),
           leading: IconButton(
-            icon: Icon(Icons.search),
+            icon: Icon(Icons.arrow_back),
             onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MyApp()),
+              );
               // focus the search bar
             },
           ),
