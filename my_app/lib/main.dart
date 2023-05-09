@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'map_page.dart';
 import 'SecondRoute.dart';
 import 'settings_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -18,7 +19,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-//"Hi Kausic"
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.deepPurple,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'
+      home: const MyHomePage(title: 'MAUSAM'
           // storage: PhotoStorage(),
           ),
     );
@@ -58,25 +58,55 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   WeatherFactory wf = WeatherFactory("c5ceceaa1d1369e8dc11555bfd199406");
-  bool _isFahrt = false;
+  bool _isFahrenheit = false;
+  Position? _currentPosition;
+  Weather? _currentWeather;
+  List<Weather>? _forecast;
+
   Future<Position> _getcurrentlocation() {
     return PositionHelper().determinePosition();
   }
 
   Future<Weather> _currentweather(Position position) {
-    return wf.currentWeatherByLocation(
-        (position).latitude, (position).longitude);
+    return wf.currentWeatherByLocation(position.latitude, position.longitude);
   }
 
   Future<List<Weather>> _getForecast(Position position) {
-    return wf.fiveDayForecastByLocation(
-        (position).latitude, (position).longitude);
+    return wf.fiveDayForecastByLocation(position.latitude, position.longitude);
   }
 
-  void _unitChanged(bool isFahrt) {
+  Future<void> _loadTemperatureUnit() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _isFahrt = isFahrt;
+      _isFahrenheit = prefs.getBool('isFahrenheit') ?? false;
     });
+  }
+
+  Future<void> _fetchWeatherData() async {
+    _currentPosition = await _getcurrentlocation();
+    _currentWeather = await _currentweather(_currentPosition!);
+    _forecast = await _getForecast(_currentPosition!);
+    setState(() {});
+  }
+
+  void _updateTemperatureUnit(bool isFahrenheit) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFahrenheit', isFahrenheit);
+    setState(() {
+      _isFahrenheit = isFahrenheit;
+    });
+    await _fetchWeatherData();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTemperatureUnit();
+    _fetchWeatherData();
+  }
+
+  String _getTemperatureUnit() {
+    return _isFahrenheit ? '°F' : '°C';
   }
 
   @override
@@ -84,145 +114,103 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: Icon(Icons.settings),
             onPressed: () async {
-              final isFahrt = await Navigator.push<bool>(
+              bool? isFahrenheit = await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => SettingsPage(
-                        onTemperatureUnitChanged: _unitChanged,
-                        isFahrt: _isFahrt)),
+                          isFahrenheit: _isFahrenheit,
+                          onTemperatureUnitChanged: _updateTemperatureUnit,
+                        )),
               );
-              if (isFahrt != null) {
-                setState(() {
-                  _isFahrt = isFahrt;
-                });
+              if (isFahrenheit != null) {
+                _updateTemperatureUnit(isFahrenheit);
               }
             },
           ),
         ],
       ),
-      body: FutureBuilder<Position>(
-        future: _getcurrentlocation(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          }
-
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          return Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: FutureBuilder<Weather>(
-                    future: _currentweather(snapshot.data!),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      }
-
-                      if (!snapshot.hasData) {
-                        return const CircularProgressIndicator();
-                      }
-
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            snapshot.data!.areaName ?? '',
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: _currentWeather == null
+                  ? CircularProgressIndicator()
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _currentWeather!.areaName ?? '',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _isFahrt
-                                ? '${snapshot.data!.temperature?.fahrenheit?.toInt() ?? ''}°F'
-                                : '${snapshot.data!.temperature?.celsius?.toInt() ?? ''}°C',
-                            style: const TextStyle(
-                              fontSize: 64,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            snapshot.data!.weatherDescription ?? '',
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Expanded(
-                child: FutureBuilder<List<Weather>>(
-                  future: _getForecast(snapshot.data!),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    }
-
-                    if (!snapshot.hasData) {
-                      return const CircularProgressIndicator();
-                    }
-
-                    return Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: DataTable(
-                          columnSpacing: 20.0,
-                          columns: const [
-                            DataColumn(label: Text('Date')),
-                            DataColumn(label: Text('Time')),
-                            DataColumn(label: Text('Temperature')),
-                            DataColumn(label: Text('Description')),
-                          ],
-                          rows: snapshot.data!
-                              .map((weather) => DataRow(
-                                    cells: [
-                                      DataCell(Text(
-                                        DateFormat('MM/dd/yyyy')
-                                            .format(weather.date!),
-                                        style: const TextStyle(fontSize: 16),
-                                      )),
-                                      DataCell(Text(
-                                        DateFormat('h:mm a')
-                                            .format(weather.date!),
-                                        style: const TextStyle(fontSize: 16),
-                                      )),
-                                      DataCell(Text(
-                                        _isFahrt
-                                            ? '${weather.temperature?.fahrenheit?.toInt() ?? ''}°F'
-                                            : '${weather.temperature?.celsius?.toInt() ?? ''}°C',
-                                        style: const TextStyle(fontSize: 16),
-                                      )),
-                                      DataCell(Text(
-                                        weather.weatherDescription ?? '',
-                                        style: const TextStyle(fontSize: 16),
-                                      )),
-                                    ],
-                                  ))
-                              .toList(),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+                        SizedBox(height: 15),
+                        Text(
+                          _isFahrenheit
+                              ? '${_currentWeather!.temperature?.fahrenheit?.toInt() ?? ''}°F'
+                              : '${_currentWeather!.temperature?.celsius?.toInt() ?? ''}°C',
+                          style: TextStyle(
+                            fontSize: 64,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 15),
+                        Text(
+                          _currentWeather!.weatherDescription ?? '',
+                          style: TextStyle(fontSize: 24),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+          Expanded(
+            child: _forecast == null
+                ? CircularProgressIndicator()
+                : SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columnSpacing: 20.0,
+                      columns: [
+                        DataColumn(label: Text('Date')),
+                        DataColumn(label: Text('Time')),
+                        DataColumn(label: Text('Temperature')),
+                        DataColumn(label: Text('Description')),
+                      ],
+                      rows: _forecast!
+                          .map((weather) => DataRow(
+                                cells: [
+                                  DataCell(Text(
+                                    DateFormat('MM/dd/yyyy')
+                                        .format(weather.date!),
+                                    style: TextStyle(fontSize: 14),
+                                  )),
+                                  DataCell(Text(
+                                    DateFormat('h:mm a').format(weather.date!),
+                                    style: TextStyle(fontSize: 14),
+                                  )),
+                                  DataCell(Text(
+                                    _isFahrenheit
+                                        ? '${weather.temperature?.fahrenheit?.toInt() ?? ''}°F'
+                                        : '${weather.temperature?.celsius?.toInt() ?? ''}°C',
+                                    style: TextStyle(fontSize: 14),
+                                  )),
+                                  DataCell(Text(
+                                    weather.weatherDescription ?? '',
+                                    style: TextStyle(fontSize: 14),
+                                  )),
+                                ],
+                              ))
+                          .toList(),
+                    ),
+                  ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
