@@ -46,25 +46,6 @@ class _MyHomePageState extends State<SecondPage> {
     });
   }
 
-  final List<String> _SupportedCity = [
-    'Chico',
-    'Sacramento',
-    'Algeria',
-    'Australia',
-    'Brazil',
-    'German',
-    'Madagascar',
-    'Mozambique',
-    'Portugal',
-    'Zambia',
-    'Madagascar',
-    'Mozambique',
-    'Portugal',
-    'Zambia',
-  ];
-
-  String _searchValue = '';
-
   @override
   void initState() {
     // TODO: implement initState
@@ -81,48 +62,26 @@ class _MyHomePageState extends State<SecondPage> {
       theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: Scaffold(
           appBar: AppBar(
-            title: TextField(
-              controller: _textController,
-              decoration: const InputDecoration(
-                hintText: 'Enter Location',
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchValue = value;
-                });
-              },
-              onSubmitted: (value) {
-                setState(() {
-                  _addHistory(value);
-                });
-                // Handle the submission here, such as performing a search
-              },
-            ),
+            title: const Text('Select Location'),
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MyApp()),
+                  MaterialPageRoute(
+                      builder: (context) => const MyApp(
+                            given_city: '',
+                          )),
                 );
                 // focus the search bar
               },
             ),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: () {
-                  _textController.clear();
-                  // clear the search bar and results
-                },
-              ),
-            ],
           ),
           body: Column(
             children: [
               Container(
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  height: 600,
+                  height: 300,
                   child: Column(
                     children: [
                       SelectState(
@@ -144,11 +103,27 @@ class _MyHomePageState extends State<SecondPage> {
                       ),
                       InkWell(
                           onTap: () {
-                            print('country selected is $countryValue');
-                            print('country selected is $stateValue');
-                            print('country selected is $cityValue');
+                            // print('country selected is $countryValue');
+                            // print('country selected is $stateValue');
+                            // print('country selected is $cityValue');
                           },
-                          child: Text(' Check'))
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              primary: Colors.blue,
+                            ),
+                            onPressed: () {
+                              if (cityValue != '') {
+                                _addHistory(cityValue);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          MyApp(given_city: cityValue)),
+                                );
+                              }
+                            },
+                            child: Text('Show Weather'),
+                          ))
                     ],
                   )),
               Expanded(
@@ -165,6 +140,12 @@ class _MyHomePageState extends State<SecondPage> {
                       //subtitle: Text('Description of Item ${index + 1}'),
                       trailing: Icon(Icons.arrow_forward),
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  MyApp(given_city: _searchHistory[index])),
+                        );
                         // handle onTap event
                         print('You tapped on Item ${index + 1}');
                       },

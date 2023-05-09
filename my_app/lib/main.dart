@@ -11,18 +11,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(const MyApp(
+    given_city: '',
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key, required this.given_city}) : super(key: key);
+
+  final String? given_city;
 
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,18 +47,21 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.deepPurple,
       ),
-      home: const MyHomePage(title: 'MAUSAM'
-          // storage: PhotoStorage(),
-          ),
+      home: MyHomePage(
+        title: 'MAUSAM', city_name: given_city ?? '',
+        // storage: PhotoStorage(),
+      ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title, required this.city_name})
+      : super(key: key);
 
   final String title;
   // final PhotoStorage storage;
+  final String city_name;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -84,6 +95,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _fetchWeatherData() async {
     _currentPosition = await _getcurrentlocation();
+    if (super.widget.city_name != '') {
+      _currentPosition = await getCityCoordinates(super.widget.city_name);
+    }
     _currentWeather = await _currentweather(_currentPosition!);
     _forecast = await _getForecast(_currentPosition!);
     setState(() {});
@@ -98,11 +112,34 @@ class _MyHomePageState extends State<MyHomePage> {
     await _fetchWeatherData();
   }
 
+  Future<Position> getCityCoordinates(String cityName) async {
+    final response = await http.get(Uri.parse(
+        'https://nominatim.openstreetmap.org/search?q=$cityName&format=json&limit=1'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body)[0];
+      final latitude = double.parse(data['lat']);
+      final longitude = double.parse(data['lon']);
+      return Position(
+          latitude: latitude,
+          longitude: longitude,
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          timestamp: null);
+    } else {
+      throw Exception('Failed to load city coordinates');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _loadTemperatureUnit();
     _fetchWeatherData();
+    print('You jnnsj on Item ${widget.city_name}');
   }
 
   String _getTemperatureUnit() {
