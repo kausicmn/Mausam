@@ -1,41 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key, required this.onTemperatureUnitChanged, required this.isFahrt}) : super(key: key);
-  final Function(bool) onTemperatureUnitChanged;
-  final bool isFahrt;
+  final bool isFahrenheit;
+  final void Function(bool) onTemperatureUnitChanged;
+
+  const SettingsPage({
+    Key? key,
+    required this.isFahrenheit,
+    required this.onTemperatureUnitChanged,
+  }) : super(key: key);
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  late bool _isCelsius;
+  bool _isFahrenheit = false;
 
   @override
   void initState() {
     super.initState();
-    _loadTemperatureUnit();
-  }
-
-  Future<void> _loadTemperatureUnit() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isCelsius = prefs.getBool('isCelsius') ?? true;
-    });
-  }
-
-  void _saveTemperatureUnit(bool isCelsius) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isCelsius', isCelsius);
-    widget.onTemperatureUnitChanged(!isCelsius);
+    _isFahrenheit = widget.isFahrenheit;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text('Settings'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -46,31 +38,40 @@ class _SettingsPageState extends State<SettingsPage> {
               'Temperature Unit',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            ListTile(
-              title: const Text('Celsius'),
-              leading: Radio<bool>(
-                value: true,
-                groupValue: _isCelsius,
-                onChanged: (bool? value) {
-                  setState(() {
-                    _isCelsius = value ?? true;
-                  });
-                  _saveTemperatureUnit(true);
-                },
-              ),
-            ),
-            ListTile(
-              title: const Text('Fahrenheit'),
-              leading: Radio<bool>(
-                value: false,
-                groupValue: _isCelsius,
-                onChanged: (bool? value) {
-                  setState(() {
-                    _isCelsius = value ?? true;
-                  });
-                  _saveTemperatureUnit(false);
-                },
-              ),
+            SizedBox(height: 8),
+            Column(
+              children: [
+                ListTile(
+                  leading: Radio(
+                    value:
+                        false, // This represents the value of the Radio button itself
+                    groupValue:
+                        _isFahrenheit, // This represents the currently selected value in the group
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isFahrenheit = value!;
+                      });
+                      widget.onTemperatureUnitChanged(_isFahrenheit);
+                      Navigator.pop(context, _isFahrenheit);
+                    },
+                  ),
+                  title: Text('Celsius'),
+                ),
+                ListTile(
+                  leading: Radio(
+                    value: true,
+                    groupValue: _isFahrenheit,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isFahrenheit = value!;
+                      });
+                      widget.onTemperatureUnitChanged(_isFahrenheit);
+                      Navigator.pop(context, _isFahrenheit);
+                    },
+                  ),
+                  title: Text('Fahrenheit'),
+                ),
+              ],
             ),
           ],
         ),
