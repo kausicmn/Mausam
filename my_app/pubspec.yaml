@@ -48,6 +48,7 @@ dependencies:
   cloud_firestore: ^4.5.3
   uuid: ^3.0.7
   geodesy: ^0.4.0-nullsafety.0
+  country_state_city_picker: ^1.2.8
 
 dev_dependencies:
   flutter_test:
