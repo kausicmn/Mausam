@@ -73,7 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Position? _currentPosition;
   Weather? _currentWeather;
   List<Weather>? _forecast;
-
   Future<Position> _getcurrentlocation() {
     return PositionHelper().determinePosition();
   }
@@ -139,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadTemperatureUnit();
     _fetchWeatherData();
+    //_pos = PositionHelper().determinePosition()
     print('You jnnsj on Item ${widget.city_name}');
   }
 
@@ -182,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Text(
                           _currentWeather!.areaName ?? '',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                           ),
@@ -192,15 +192,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           _isFahrenheit
                               ? '${_currentWeather!.temperature?.fahrenheit?.toInt() ?? ''}°F'
                               : '${_currentWeather!.temperature?.celsius?.toInt() ?? ''}°C',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 64,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         Text(
                           _currentWeather!.weatherDescription ?? '',
-                          style: TextStyle(fontSize: 24),
+                          style: const TextStyle(fontSize: 24),
                         ),
                       ],
                     ),
@@ -208,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
             child: _forecast == null
-                ? CircularProgressIndicator()
+                ? Text('Loading Please Wait')
                 : SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: DataTable(

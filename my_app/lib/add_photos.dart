@@ -21,6 +21,7 @@ class _AddPhotoState extends State<AddPhoto> {
   File? _image;
   Position? _position;
   final myController = TextEditingController();
+  bool _uploading = false;
   @override
   void dispose() {
     myController.dispose();
@@ -66,10 +67,16 @@ class _AddPhotoState extends State<AddPhoto> {
     if (_position == null) {
       return;
     }
+    setState(() {
+      _uploading = true;
+    });
     var uuid = const Uuid();
     final String uuidString = uuid.v4();
     final String downloadUrl = await uploadFile(uuidString);
     await _addItem(downloadUrl, myController.text, uuidString);
+    setState(() {
+      _uploading = false;
+    });
     if (kDebugMode) {
       print(uuidString);
     }
@@ -120,8 +127,10 @@ class _AddPhotoState extends State<AddPhoto> {
                 border: OutlineInputBorder(), hintText: "Title of the photo"),
           ),
           ElevatedButton(
-            onPressed: _upload,
-            child: const Text("Submit"),
+            onPressed: _uploading ? null : _upload,
+            child: _uploading
+                ? const CircularProgressIndicator()
+                : const Text("Submit"),
           ),
         ],
       )),
