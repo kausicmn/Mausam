@@ -74,7 +74,7 @@ class _MyHomePageState extends State<SecondPage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Locations',
-      theme: ThemeData(primarySwatch: Colors.orange),
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: Scaffold(
         appBar: AppBar(
           title: TextField(
