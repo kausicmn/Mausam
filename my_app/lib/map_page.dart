@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,13 +8,11 @@ import 'package:my_app/images.dart';
 import 'package:my_app/position.dart';
 import 'package:uuid/uuid.dart';
 import 'add_photos.dart';
-import 'firebase_options.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key, required this.title});
 
   final String title;
-  // final PhotoStorage storage;
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -40,7 +37,7 @@ class _MapPageState extends State<MapPage> {
     _position = PositionHelper().determinePosition();
     markers = <Marker>{};
     setState(() {
-      getMarkersFromFirebase();
+      getMarkers();
     });
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.best,
@@ -51,7 +48,6 @@ class _MapPageState extends State<MapPage> {
         .listen((Position? position) {
       setState(() {
         _position = returnPosition(position);
-        // _goToTheLake(position!);
       });
       if (kDebugMode) {
         print(position == null
@@ -114,7 +110,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _handleTap(LatLng point) {
-    // Create a new marker
     final marker = Marker(
       markerId: MarkerId(const Uuid().v4()),
       position: point,
@@ -125,11 +120,11 @@ class _MapPageState extends State<MapPage> {
       'longitude': marker.position.longitude,
     });
     setState(() {
-      getMarkersFromFirebase();
+      getMarkers();
     });
   }
 
-  Future<void> getMarkersFromFirebase() async {
+  Future<void> getMarkers() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('marker').get();
     for (DocumentSnapshot doc in snapshot.docs) {

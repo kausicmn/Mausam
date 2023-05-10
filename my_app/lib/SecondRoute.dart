@@ -1,9 +1,8 @@
-import 'package:easy_search_bar/easy_search_bar.dart';
+// ignore: file_names
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:my_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'main.dart';
 import 'package:country_state_city_picker/country_state_city_picker.dart';
 
 void main() {
@@ -53,8 +52,6 @@ class _MyHomePageState extends State<SecondPage> {
     _getHistory();
   }
 
-  final TextEditingController _textController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -64,7 +61,7 @@ class _MyHomePageState extends State<SecondPage> {
           appBar: AppBar(
             title: const Text('Select Location'),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -80,7 +77,7 @@ class _MyHomePageState extends State<SecondPage> {
           body: Column(
             children: [
               Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   height: 300,
                   child: Column(
                     children: [
@@ -122,7 +119,7 @@ class _MyHomePageState extends State<SecondPage> {
                                 );
                               }
                             },
-                            child: Text('Show Weather'),
+                            child: const Text('Show Weather'),
                           ))
                     ],
                   )),
@@ -138,7 +135,7 @@ class _MyHomePageState extends State<SecondPage> {
                       // display index number in a circle avatar
                       title: Text(_searchHistory[index]),
                       //subtitle: Text('Description of Item ${index + 1}'),
-                      trailing: Icon(Icons.arrow_forward),
+                      trailing: const Icon(Icons.arrow_forward),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -147,7 +144,9 @@ class _MyHomePageState extends State<SecondPage> {
                                   MyApp(given_city: _searchHistory[index])),
                         );
                         // handle onTap event
-                        print('You tapped on Item ${index + 1}');
+                        if (kDebugMode) {
+                          print('You tapped on Item ${index + 1}');
+                        }
                       },
                     );
                   },

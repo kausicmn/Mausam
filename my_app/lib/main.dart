@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_app/position.dart';
@@ -7,10 +8,8 @@ import 'map_page.dart';
 import 'SecondRoute.dart';
 import 'settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -139,11 +138,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadTemperatureUnit();
     _fetchWeatherData();
-    print('You jnnsj on Item ${widget.city_name}');
-  }
-
-  String _getTemperatureUnit() {
-    return _isFahrenheit ? '°F' : '°C';
   }
 
   @override
@@ -154,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: () async {
               bool? isFahrenheit = await Navigator.push(
                 context,
@@ -176,31 +170,31 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: Center(
               child: _currentWeather == null
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           _currentWeather!.areaName ?? '',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         Text(
                           _isFahrenheit
                               ? '${_currentWeather!.temperature?.fahrenheit?.toInt() ?? ''}°F'
                               : '${_currentWeather!.temperature?.celsius?.toInt() ?? ''}°C',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 64,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         Text(
                           _currentWeather!.weatherDescription ?? '',
-                          style: TextStyle(fontSize: 24),
+                          style: const TextStyle(fontSize: 24),
                         ),
                       ],
                     ),
@@ -208,12 +202,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
             child: _forecast == null
-                ? CircularProgressIndicator()
+                ? const Text('Loading Please wait')
                 : SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: DataTable(
                       columnSpacing: 20.0,
-                      columns: [
+                      columns: const [
                         DataColumn(label: Text('Date')),
                         DataColumn(label: Text('Time')),
                         DataColumn(label: Text('Temperature')),
@@ -225,21 +219,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                   DataCell(Text(
                                     DateFormat('MM/dd/yyyy')
                                         .format(weather.date!),
-                                    style: TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 14),
                                   )),
                                   DataCell(Text(
                                     DateFormat('h:mm a').format(weather.date!),
-                                    style: TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 14),
                                   )),
                                   DataCell(Text(
                                     _isFahrenheit
                                         ? '${weather.temperature?.fahrenheit?.toInt() ?? ''}°F'
                                         : '${weather.temperature?.celsius?.toInt() ?? ''}°C',
-                                    style: TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 14),
                                   )),
                                   DataCell(Text(
                                     weather.weatherDescription ?? '',
-                                    style: TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 14),
                                   )),
                                 ],
                               ))
