@@ -23,13 +23,13 @@ class _DisplayImageState extends State<DisplayImage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: tap(),
+          children: retrieveimages(),
         ),
       ),
     );
   }
 
-  List<Widget> tap() {
+  List<Widget> retrieveimages() {
     List<Widget> widgets = [];
     widgets.add(StreamBuilder(
         stream: FirebaseFirestore.instance.collection("photos").snapshots(),
@@ -43,14 +43,14 @@ class _DisplayImageState extends State<DisplayImage> {
           if (!snapshot.hasData) {
             return const Text("Loading Photos");
           }
-          List<DocumentSnapshot> matchingDocs = [];
+          List<DocumentSnapshot> imagesWithInRange = [];
           for (DocumentSnapshot d in snapshot.data!.docs) {
             GeoPoint g = d.get('geopoint');
             num distance = geodesy.distanceBetweenTwoGeoPoints(
                 LatLng(g.latitude, g.longitude),
                 LatLng(widget.latitude, widget.longitude));
             if (distance <= 5000) {
-              matchingDocs.add(d);
+              imagesWithInRange.add(d);
             }
           }
           return Expanded(
@@ -58,10 +58,10 @@ class _DisplayImageState extends State<DisplayImage> {
                   child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             itemBuilder: (context, index) {
-              DocumentSnapshot item = matchingDocs[index];
+              DocumentSnapshot item = imagesWithInRange[index];
               return photoWidget(item);
             },
-            itemCount: matchingDocs.length,
+            itemCount: imagesWithInRange.length,
             shrinkWrap: true,
           )));
         }));
@@ -74,7 +74,6 @@ class _DisplayImageState extends State<DisplayImage> {
         children: [
           ListTile(
             title: Text(snapshot["title"]),
-            subtitle: Text(snapshot["uid"]),
           ),
           Image.network(snapshot["downloadURL"])
         ],
