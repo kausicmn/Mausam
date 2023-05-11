@@ -1,6 +1,4 @@
-import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:my_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
@@ -48,7 +46,6 @@ class _MyHomePageState extends State<SecondPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _getHistory();
   }
@@ -73,7 +70,6 @@ class _MyHomePageState extends State<SecondPage> {
                             given_city: '',
                           )),
                 );
-                // focus the search bar
               },
             ),
           ),
@@ -102,11 +98,7 @@ class _MyHomePageState extends State<SecondPage> {
                         },
                       ),
                       InkWell(
-                          onTap: () {
-                            // print('country selected is $countryValue');
-                            // print('country selected is $stateValue');
-                            // print('country selected is $cityValue');
-                          },
+                          onTap: () {},
                           child: TextButton(
                             style: TextButton.styleFrom(
                               primary: Colors.blue,
@@ -135,9 +127,7 @@ class _MyHomePageState extends State<SecondPage> {
                       leading: CircleAvatar(
                         child: Text('${index + 1}'),
                       ),
-                      // display index number in a circle avatar
                       title: Text(_searchHistory[index]),
-                      //subtitle: Text('Description of Item ${index + 1}'),
                       trailing: Icon(Icons.arrow_forward),
                       onTap: () {
                         Navigator.push(
@@ -146,8 +136,6 @@ class _MyHomePageState extends State<SecondPage> {
                               builder: (context) =>
                                   MyApp(given_city: _searchHistory[index])),
                         );
-                        // handle onTap event
-                        print('You tapped on Item ${index + 1}');
                       },
                     );
                   },
