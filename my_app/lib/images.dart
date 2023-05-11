@@ -74,7 +74,6 @@ class _DisplayImageState extends State<DisplayImage> {
         children: [
           ListTile(
             title: Text(snapshot["title"]),
-            subtitle: Text(snapshot["uid"]),
           ),
           Image.network(snapshot["downloadURL"])
         ],
