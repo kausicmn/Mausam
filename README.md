@@ -2,7 +2,7 @@
 
 Mausam is a weather application that provides users with real-time weather information and forecasts. The word "mausam" translates to "weather" in Hindi, reflecting the application's connection to Indian culture and language. Built with a focus on user experience and functionality, Mausam incorporates important features such as internet connectivity, camera integration, and location services.
 
-**Key Features**
+## Key Features
 
 **Real-time Weather Data**: Mausam utilizes internet connectivity to retrieve up-to-date weather information from reliable sources. Users can rely on accurate and timely weather data to plan their activities accordingly.
 
@@ -16,6 +16,6 @@ Mausam is a weather application that provides users with real-time weather infor
 
 **Unit Selection**: To cater to a global user base, Mausam includes a settings tab where users can easily switch between Celsius and Fahrenheit. This flexibility ensures that users can view the weather information in their preferred units of measurement.
 
-**Technologies Used**
+## Technologies Used
 
 **Flutter**: Mausam is developed using Flutter, a powerful cross-platform development framework. Flutter enables the creation of visually appealing and performant applications for both Android and iOS platforms.
